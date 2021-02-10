@@ -2,6 +2,14 @@
   <h1>Hello Maz</h1>
   <form @submit.prevent="doSearch">
     <label>
+      Client ID
+      <input type="text" v-model="user" />
+    </label>
+    <label>
+      Client Secret
+      <input type="text" v-model="pass" />
+    </label>
+    <label>
       Text Search
       <input type="search" v-model="q" />
     </label>
@@ -14,6 +22,8 @@
       <input type="text" v-model="country" />
     </label>
     <button type="submit">Search</button>
+    <button type="button" @click="resetAuth">Reset auth token</button>
+    <pre v-if="auth.token">{{ auth.token }}</pre>
     <div v-if="loading">Loading</div>
     <div v-if="error" class="error">
       Error fetching from API, check your console
@@ -27,6 +37,7 @@
           :alt="`${item.attributes.name} logo`"
           width="150"
           height="150"
+          loading="lazy"
         />
       </figure>
       <h2>{{ item.attributes.name }}</h2>
@@ -39,15 +50,21 @@
 
 <script>
 import { toRefs } from "vue";
+import useApiAuth from "../composables/useApiAuth";
 import useCauseSearchApi from "../composables/useCauseSearchApi.js";
 export default {
   name: "Search",
   setup() {
-    // Needs an access token
-    const { state, doSearch, facets } = useCauseSearchApi("");
+    const { user, pass, resetAuth, auth } = useApiAuth();
+
+    const { state, doSearch, facets } = useCauseSearchApi();
 
     return {
       doSearch,
+      user,
+      pass,
+      resetAuth,
+      auth,
       ...toRefs(state),
       ...toRefs(facets),
     };
@@ -60,6 +77,7 @@ export default {
 img {
   height: auto;
   max-width: 100%;
+  width: 100%;
 }
 .results {
   display: grid;
