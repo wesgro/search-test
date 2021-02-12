@@ -1,7 +1,6 @@
 import { reactive, computed, readonly } from "vue";
 import useApiAuth from "./useApiAuth";
-// Needs an auth token or this will do NOTHING
-const url = "https://api.benevity-staging.org/search/causes";
+import useClient from "./useClient";
 
 export default function useCauseSearchApi() {
   const state = reactive({
@@ -14,27 +13,13 @@ export default function useCauseSearchApi() {
   const facets = reactive({ q: null, category: null, country: "CA" });
   const getSearchUrls = computed(
     () =>
-      `${url}?${Object.keys(facets)
+      `?${Object.keys(facets)
         .filter((k) => facets[k])
         .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(facets[k])}`)
         .join("&")}`
   );
   async function getSearchData() {
-    const { doAuth, auth } = useApiAuth();
-    await doAuth();
-    if (!auth.token) {
-      throw new Error("No Token");
-    }
-    const headers = new Headers({
-      Authorization: auth.token,
-    });
-
-    const response = await fetch(getSearchUrls.value, {
-      mode: "cors",
-      method: "GET",
-      headers,
-    });
-    return response.json();
+    return useClient(`search/causes${getSearchUrls.value}`);
   }
 
   async function doSearch() {

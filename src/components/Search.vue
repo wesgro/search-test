@@ -1,39 +1,34 @@
 <template>
-  <h1>Hello Maz</h1>
-  <form @submit.prevent="doSearch">
-    <label>
-      Client ID
-      <input type="text" v-model="user" />
-    </label>
-    <label>
-      Client Secret
-      <input type="text" v-model="pass" />
-    </label>
-    <label>
-      Text Search
-      <input type="search" v-model="q" />
-    </label>
-    <label>
-      Category
-      <input type="text" v-model="category" />
-    </label>
-    <label>
-      Country
-      <input type="text" v-model="country" />
-    </label>
-    <button type="submit">Search</button>
-    <button type="button" @click="resetAuth">Reset auth token</button>
-    <pre v-if="auth.token">{{ auth.token }}</pre>
-    <div v-if="loading">Loading</div>
-    <div v-if="error" class="error">
-      Error fetching from API, check your console
-    </div>
-  </form>
-  <div class="results" v-if="data.length > 0">
+  <div class="center">
+    <form @submit.prevent="onClick">
+      <h1>Hello Maz</h1>
+      <h2 v-if="data.length > 0">
+        Would you like to see {{ data.length }} things?
+      </h2>
+      <label>
+        Text Search
+        <input type="search" v-model="q" />
+      </label>
+      <label>
+        Category
+        <input type="text" v-model="category" />
+      </label>
+      <label>
+        Country
+        <input type="text" v-model="country" />
+      </label>
+      <button type="submit">Search</button>
+      <div v-if="loading">Loading</div>
+      <div v-if="error" class="error">
+        Error fetching from API, check your console
+      </div>
+    </form>
+  </div>
+  <div class="results" v-show="data.length > 0 && !loading">
     <div v-for="(item, i) in data" :key="i" class="cause">
-      <figure v-if="item.attributes.logo">
+      <figure>
         <img
-          :src="item.attributes.logo"
+          :src="item?.attributes?.logo || 'https://www.fillmurray.com/150/150'"
           :alt="`${item.attributes.name} logo`"
           width="150"
           height="150"
@@ -46,23 +41,26 @@
       </p>
     </div>
   </div>
+  <div v-show="data.length === 0 && !loading" class="empty center">
+    Nothing here buckaroo :(
+  </div>
 </template>
 
 <script>
-import { toRefs } from "vue";
+import { reactive, toRefs } from "vue";
 import useApiAuth from "../composables/useApiAuth";
 import useCauseSearchApi from "../composables/useCauseSearchApi.js";
 export default {
   name: "Search",
   setup() {
-    const { user, pass, resetAuth, auth } = useApiAuth();
+    const { resetAuth, auth } = useApiAuth();
 
     const { state, doSearch, facets } = useCauseSearchApi();
-
+    function onClick() {
+      doSearch();
+    }
     return {
-      doSearch,
-      user,
-      pass,
+      onClick,
       resetAuth,
       auth,
       ...toRefs(state),
@@ -74,11 +72,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-img {
-  height: auto;
-  max-width: 100%;
-  width: 100%;
-}
 .results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -89,24 +82,32 @@ img {
   border-radius: 5px;
   padding: 0.75rem;
   border: 1px solid rgb(141, 141, 141);
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.3rem;
 }
 .cause h2 {
   margin: 0;
   margin-block-end: 0.3em;
 }
-form,
-label {
-  display: flex;
-  flex-direction: column;
+
+figure {
+  background-color: var(--cultured);
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.2rem;
+  border-radius: 10px;
 }
-form {
-  max-width: 20rem;
-  margin-block-end: 5rem;
-}
-form > * + * {
-  margin-block-start: 0.5rem;
+img {
+  width: auto;
+  border-radius: 5px;
 }
 .error {
   color: red;
+}
+
+form {
+  width: 100%;
 }
 </style>

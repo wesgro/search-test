@@ -36,10 +36,7 @@ export default function useApiAuth() {
       "Authorization",
       "Basic " + btoa(`${credentials.user}:${credentials.pass}`)
     );
-    headers.append(
-      "Content-Type",
-      "application/x-www-form-urlencoded;charset=UTF-8"
-    );
+    headers.append("Content-Type", "application/x-www-form-urlencoded");
 
     const body = new URLSearchParams({
       grant_type: "client_credentials",
